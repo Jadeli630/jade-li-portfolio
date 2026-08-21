@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { geoEqualEarth, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import world from "world-atlas/countries-110m.json";
@@ -869,11 +869,47 @@ function PageShell({
   );
 }
 
+type PublicComment = {
+  id: number;
+  name: string;
+  body: string;
+  created_at: string;
+};
+
+function formatCommentDate(value: string) {
+  const parsed = new Date(`${value.replace(" ", "T")}Z`);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return new Intl.DateTimeFormat("en", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
+}
+
 function CommentBox({ context, compact = false }: { context?: string; compact?: boolean }) {
   const [sent, setSent] = useState(false);
   const [expanded, setExpanded] = useState(!compact);
   const [commentBody, setCommentBody] = useState("");
   const [commentError, setCommentError] = useState("");
+  const [comments, setComments] = useState<PublicComment[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const commentContext = context ?? "Home";
+
+    void fetch(`/api/comments?context=${encodeURIComponent(commentContext)}`)
+      .then((response) => response.json())
+      .then((data: { comments?: PublicComment[] }) => {
+        if (active) setComments(data.comments ?? []);
+      })
+      .catch(() => {
+        if (active) setComments([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [context]);
 
   async function submitComment() {
     setCommentError("");
@@ -895,6 +931,19 @@ function CommentBox({ context, compact = false }: { context?: string; compact?: 
     <section className={`comments ${context ? "post-comments" : ""} ${compact ? "compact-comments" : ""}`}>
       <h2>Leave a comment</h2>
       {context && <p className="comment-context">On “{context}”</p>}
+      {comments.length > 0 && (
+        <div className="comment-thread" aria-label="Published comments">
+          {comments.map((comment) => (
+            <article className="comment-card" key={comment.id}>
+              <div className="comment-meta">
+                <span className="comment-author">{comment.name}</span>
+                <time dateTime={comment.created_at}>{formatCommentDate(comment.created_at)}</time>
+              </div>
+              <p>{comment.body}</p>
+            </article>
+          ))}
+        </div>
+      )}
       {compact && !expanded ? (
         <button className="comment-expand" type="button" onClick={() => setExpanded(true)}>Write a comment <span aria-hidden="true">→</span></button>
       ) : (
