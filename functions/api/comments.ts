@@ -17,7 +17,7 @@ export const onRequestPost = async ({ request, env }: PagesContext) => {
   if (body.length > 3000) return Response.json({ error: "Comment is too long" }, { status: 400 });
 
   await env.COMMENTS_DB.prepare(
-    "INSERT INTO comments (post_context, name, email, body, status) VALUES (?, ?, ?, ?, 'pending')",
+    "INSERT INTO comments (post_context, name, email, body, status) VALUES (?, ?, ?, ?, 'approved')",
   )
     .bind(
       payload.context?.trim().slice(0, 240) || "Home",
@@ -36,7 +36,7 @@ export const onRequestGet = async ({ request, env }: PagesContext) => {
   if (!context) return Response.json({ comments: [] });
 
   const result = await env.COMMENTS_DB.prepare(
-    "SELECT id, post_context, name, body, created_at FROM comments WHERE status = 'approved' AND post_context = ? ORDER BY created_at DESC LIMIT 50",
+    "SELECT id, post_context, name, body, created_at FROM comments WHERE status != 'deleted' AND post_context = ? ORDER BY created_at DESC LIMIT 50",
   )
     .bind(context)
     .all();
