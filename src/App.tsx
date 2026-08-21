@@ -922,6 +922,15 @@ function CommentBox({ context, compact = false }: { context?: string; compact?: 
     if (data.submitted) {
       setSent(true);
       setCommentBody("");
+
+      const commentContext = context ?? "Home";
+      try {
+        const refreshedResponse = await fetch(`/api/comments?context=${encodeURIComponent(commentContext)}`);
+        const refreshedData = await refreshedResponse.json() as { comments?: PublicComment[] };
+        setComments(refreshedData.comments ?? []);
+      } catch {
+        // The comment is already stored; the thread can refresh on the next visit.
+      }
     } else {
       setCommentError(data.error ?? "Your comment could not be submitted.");
     }
@@ -950,7 +959,7 @@ function CommentBox({ context, compact = false }: { context?: string; compact?: 
         <>
           {sent ? (
             <p className="comment-thanks">
-              Thank you. Your comment is awaiting review.
+              Thank you. Your comment is now live.
             </p>
           ) : (
             <form
@@ -964,7 +973,7 @@ function CommentBox({ context, compact = false }: { context?: string; compact?: 
                 <textarea required rows={5} value={commentBody} onChange={(event) => setCommentBody(event.target.value)} />
               </label>
               <button className="primary">POST COMMENT</button>
-              <small>Comments are reviewed before appearing publicly.</small>
+              <small>Comments appear publicly after submission.</small>
               {commentError && <small role="alert">{commentError}</small>}
             </form>
           )}
