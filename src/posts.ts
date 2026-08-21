@@ -36,6 +36,7 @@ const markdownFiles = import.meta.glob("../content/posts/*.md", {
 }) as Record<string, string>;
 
 export const publishedPosts: ManagedPost[] = Object.entries(markdownFiles)
+  .filter(([path]) => !path.endsWith("/README.md") && !path.split("/").pop()?.startsWith("_"))
   .map(([path, source], index) => {
     const { data, body } = parseFrontmatter(source);
     const fallbackSlug = path.split("/").pop()?.replace(/\.md$/, "") ?? `post-${index + 1}`;
