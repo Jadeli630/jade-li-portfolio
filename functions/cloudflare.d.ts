@@ -12,6 +12,10 @@ interface D1Database {
   prepare(query: string): D1PreparedStatement;
 }
 
+interface Fetcher {
+  fetch(input: Request | URL | string, init?: RequestInit): Promise<Response>;
+}
+
 interface EventContext<Env, Params extends string, Data> {
   request: Request;
   env: Env;

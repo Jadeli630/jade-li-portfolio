@@ -1,3 +1,9 @@
-name = "jade-li"
-pages_build_output_dir = "dist"
+name = "jade-li-portfolio"
+main = "worker/index.ts"
 compatibility_date = "2026-08-21"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = true
