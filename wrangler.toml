@@ -1,8 +1,3 @@
 name = "jade-li"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-08-21"
-
-[[d1_databases]]
-binding = "COMMENTS_DB"
-database_name = "jade-li-comments"
-database_id = "REPLACE_AFTER_DATABASE_CREATION"
