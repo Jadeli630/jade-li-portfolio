@@ -1,4 +1,4 @@
-name = "jade-li-portfolio"
+name = "me"
 main = "worker/index.ts"
 compatibility_date = "2026-08-21"
 workers_dev = true
